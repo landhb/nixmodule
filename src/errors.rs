@@ -8,6 +8,7 @@ use std::error::Error;
 #[derive(Debug)]
 pub enum NixModuleError {
     BadFilePath,
+    QemuError,
 }
 
 impl Display for NixModuleError {

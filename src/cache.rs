@@ -4,7 +4,6 @@ use std::error::Error;
 use std::ffi::OsStr;
 use std::fs;
 use std::fs::File;
-use std::io::copy;
 use std::path::{Path, PathBuf};
 
 use crate::errors::NixModuleError::*;
