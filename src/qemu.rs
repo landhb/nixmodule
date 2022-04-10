@@ -1,4 +1,5 @@
 use crate::errors::NixModuleError::*;
+use crate::utils::print_output;
 use crate::KConfig;
 use colored::*;
 use rand::Rng;
@@ -12,12 +13,6 @@ pub struct Qemu {
     handle: Child,
     sshkey: String,
     sshport: String,
-}
-
-fn print_output(out: &str) {
-    for line in out.split("\n") {
-        println!("{}", line);
-    }
 }
 
 impl Qemu {

@@ -17,3 +17,10 @@ macro_rules! log_success {
 macro_rules! prompt {
     ($($arg:tt)*) => (format!("{} {}", "[?]".yellow().bold(), format_args!($($arg)*)));
 }
+
+/// Print output by line
+pub fn print_output(out: &str) {
+    for line in out.split("\n") {
+        println!("{}", line);
+    }
+}

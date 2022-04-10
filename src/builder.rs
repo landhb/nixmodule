@@ -1,4 +1,5 @@
 use crate::errors::NixModuleError::*;
+use crate::utils::print_output;
 use crate::KConfig;
 use std::error::Error;
 use std::process::Command;
@@ -17,7 +18,8 @@ impl ModuleBuilder {
         match res.status.success() {
             true => Ok(format!("{}/{}-{}.ko", builddir, name, kernel.version)),
             false => {
-                println!("{:?}", std::str::from_utf8(&res.stderr)?);
+                print_output(std::str::from_utf8(&res.stdout)?);
+                print_output(std::str::from_utf8(&res.stderr)?);
                 Err(BuildError.into())
             }
         }

@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use structopt::StructOpt;
 
 #[macro_use]
-mod macros;
+mod utils;
 
 mod cache;
 use cache::Cache;
@@ -107,7 +107,7 @@ fn test(module: &Module, kernel: &KConfig, handle: &Qemu) -> Result<(), Box<dyn 
     handle
         .runcmd(&module.test_script.remote)
         .or(Err(TestError))?;
-
+    log_success!("Test successful for {}!", kernel.version);
     Ok(())
 }
 
