@@ -1,17 +1,33 @@
 
 # NixModule
 
-
-
-## Pre-Built Kernels
-
-| Version | BzImage | Headers |
-
-## Pre-Built Disk Images
+- [Pre-Built Kernels](#pre-built-kernels)  
+- [Pre-Built Disk Images](#pre-built-disks)  
+- [Using Other Kernels](#using-other-kernels)  
+- [Using Other Disk Images](#using-other-disks)  
 
 
 
-## Using Other Kernels
+
+## Pre-Built Kernels <a name="pre-built-kernels"/>
+
+| Version | BzImage   | Headers |
+| :---:   | :---:     | :---:   |
+| 5.17.2  | [bZimage](https://files.sboc.dev/linux-kernels/bzImage-5.17.2) | [Headers](https://files.sboc.dev/linux-headers/linux-5.17.2-headers.tar.gz)| 
+| 5.8.9   | [bZimage](https://files.sboc.dev/linux-kernels/bzImage-5.8.9)  | [Headers](https://files.sboc.dev/linux-headers/linux-5.8.9-headers.tar.gz)| 
+| 5.4.188 | [bZimage](https://files.sboc.dev/linux-kernels/bzImage-5.4.188)| [Headers](https://files.sboc.dev/linux-headers/linux-5.4.188-headers.tar.gz)| 
+| 4.19.237| [bZimage](https://files.sboc.dev/linux-kernels/bzImage-4.19.237) | [Headers](https://files.sboc.dev/linux-headers/linux-4.19.237-headers.tar.gz)| 
+| 4.14.275| [bZimage](https://files.sboc.dev/linux-kernels/bzImage-4.14.275) | [Headers](https://files.sboc.dev/linux-headers/linux-4.14.275-headers.tar.gz)| 
+| 4.9.309| [bZimage](https://files.sboc.dev/linux-kernels/bzImage-4.9.309) | [Headers](https://files.sboc.dev/linux-headers/linux-4.4.309-headers.tar.gz)| 
+| 4.1.52| [bZimage](https://files.sboc.dev/linux-kernels/bzImage-4.1.52) | [Headers](https://files.sboc.dev/linux-headers/linux-4.1.52-headers.tar.gz)| 
+
+## Pre-Built Disk Images <a name="pre-built-disks"/>
+
+| Name    | Link      | SSH Key |
+| :---:   | :---:     | :---:   |
+| Syzcaller Debian Stretch   | [Image](https://files.sboc.dev/images/stretch/stretch.img)  | [Key](https://files.sboc.dev/images/stretch/stretch.id_rsa)  
+
+## Using Other Kernels <a name="using-other-kernels"/>
 
 Use the packing script
 
@@ -38,7 +54,8 @@ path = "images/stretch/stretch.img"
 sshkey = "images/stretch/stretch.id_rsa"
 ```
 
-## Using Other Disk Images
+
+## Using Other Disk Images <a name="using-other-disks"/>
 
 Fill out the `[kernels.disk]` entry for the kernel you'd like to use the new disk with:
 
