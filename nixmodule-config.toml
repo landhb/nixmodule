@@ -9,6 +9,19 @@ cache = "~/.cache/nixmodule"
 
 [module]
 name = "drawbridge"
+insmod_args = "ports=8000"
+
+[module.test_script]
+local = "./tests/test.sh"
+remote = "/tmp/test.sh"
+
+[[module.test_files]]
+local = "../tools/target/x86_64-unknown-linux-musl/release/db"
+remote = "/usr/bin/db"
+
+[[module.test_files]]
+local = "/tmp/test_key"
+remote = "/tmp/test_key"
 
 #######################################################
 # 5.17.2 Test
