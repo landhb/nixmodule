@@ -9,12 +9,12 @@ use std::time::Duration;
 
 pub struct Qemu {
     handle: Child,
-    config: KConfig,
+    sshkey: String,
 }
 
 impl Qemu {
     /// Start Qemu with the provided configuration
-    pub fn start(kernel: KConfig) -> Result<Self, Box<dyn Error>> {
+    pub fn start(kernel: &KConfig) -> Result<Self, Box<dyn Error>> {
         let mut qemu = Command::new(&kernel.runner);
 
         // Optional args
@@ -34,7 +34,7 @@ impl Qemu {
                     "-append",
                     "console=ttyS0 root=/dev/sda earlyprintk=serial net.ifnames=0 nokaslr",
                 ])
-                .args(["-drive", &format!("file={},format=raw", &kernel.disk)])
+                .args(["-drive", &format!("file={},format=raw", &kernel.disk.path)])
                 .args([
                     "-net",
                     "user,host=10.0.2.10,hostfwd=tcp:127.0.0.1:10021-:22",
@@ -43,11 +43,13 @@ impl Qemu {
                 .arg("-enable-kvm")
                 .arg("-nographic")
                 .args(["-pidfile", "vm.pid"])
+                .stdin(Stdio::null())
                 .stdout(Stdio::null())
                 .stderr(Stdio::null())
                 .spawn()
                 .or(Err(QemuError))?,
-            config: kernel,
+            sshkey: kernel.disk.sshkey.clone(),
+            //config: kernel,
         };
 
         // Wait until boot is complete/ssh is open
@@ -58,10 +60,30 @@ impl Qemu {
         Ok(res)
     }
 
+    pub fn runcmd(&self, cmd: &str) -> Result<(), Box<dyn Error>> {
+        println!("Running {}", cmd);
+        let res = Command::new("ssh")
+            .args(["-i", &self.sshkey])
+            .args(["-p", "10021"])
+            .args(["-oStrictHostKeyChecking=no"])
+            .arg("root@localhost")
+            .arg(cmd)
+            .output()?;
+
+        match res.status.success() {
+            true => Ok(()),
+            false => {
+                println!("{:?}", std::str::from_utf8(&res.stderr)?);
+                Err(SshError.into())
+            }
+        }
+    }
+
     /// Transfer a file into the running VM
     pub fn transfer(&self, local: &str, remote: &str) -> Result<(), Box<dyn Error>> {
+        println!("Uploading {}", local);
         let res = Command::new("scp")
-            .args(["-i", &self.config.sshkey])
+            .args(["-i", &self.sshkey])
             .args(["-P", "10021"])
             .args(["-oStrictHostKeyChecking=no"])
             .arg(local)
@@ -70,7 +92,10 @@ impl Qemu {
 
         match res.status.success() {
             true => Ok(()),
-            false => Err(SshError.into()),
+            false => {
+                println!("{:?}", std::str::from_utf8(&res.stderr)?);
+                Err(SshError.into())
+            }
         }
     }
 

@@ -1,11 +1,43 @@
-cache = "~/.config/nixmodule"
+#######################################################
+# Cache Config
+#######################################################
+cache = "~/.cache/nixmodule"
 
+#######################################################
+# Module Config
+#######################################################
+
+[module]
+name = "drawbridge"
+
+#######################################################
+# 5.17.2 Test
+#######################################################
 [[kernels]]
 version = "5.17.2"
-url_base = "localhost:8000"
-headers = "linux-5.17.2-guest.tar.gz" 
-kernel = "linux-5.17.2/arch/x86/boot/bzImage"
-disk = "linux-5.17.2-build/image/stretch.img"
-sshkey = "linux-5.17.2-build/image/stretch.id_rsa"
-keyfile = "stretch.id_rsa"
+url_base = "https://files.sboc.dev"
+headers = "linux-headers/linux-5.17.2-headers.tar.gz" 
+kernel = "linux-kernels/bzImage-5.17.2"
 runner = "qemu-system-x86_64"
+
+[kernels.disk]
+name = "stretch"
+url_base = "https://files.sboc.dev"
+path = "images/stretch/stretch.img"
+sshkey = "images/stretch/stretch.id_rsa"
+
+#######################################################
+# 5.8.9 Test
+#######################################################
+[[kernels]]
+version = "5.8.9"
+url_base = "https://files.sboc.dev"
+headers = "linux-headers/linux-5.8.9-headers.tar.gz" 
+kernel = "linux-kernels/bzImage-5.8.9"
+runner = "qemu-system-x86_64"
+
+[kernels.disk]
+name = "stretch"
+url_base = "https://files.sboc.dev"
+path = "images/stretch/stretch.img"
+sshkey = "images/stretch/stretch.id_rsa"

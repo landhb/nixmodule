@@ -32,7 +32,7 @@ impl Cache {
     pub fn new(cache: &PathBuf) -> Self {
         if !cache.as_path().exists() {
             fs::create_dir_all(cache.join("downloads")).unwrap();
-            fs::create_dir(cache.join("cache")).unwrap();
+            fs::create_dir_all(cache.join("cache").join("images")).unwrap();
         }
         Self { dir: cache.clone() }
     }
@@ -45,28 +45,29 @@ impl Cache {
 
         // The cache folder for this KConfig
         let cache_dir = self.dir.as_path().join("cache").join(&kernel.version);
+        let images_dir = self.dir.as_path().join("cache").join("images");
 
         // Get headers
-        let headers_url = format!("http://{}/{}", kernel.url_base, kernel.headers);
+        let headers_url = format!("{}/{}", kernel.url_base, kernel.headers);
         let headers_cpath = cache_dir.join("headers");
         let headers_dpath = self.download(&headers_url, &headers_cpath)?;
         self.check_local(&headers_dpath, &headers_cpath)?;
 
         // Get bzImage
-        let kernel_url = format!("http://{}/{}", kernel.url_base, kernel.kernel);
+        let kernel_url = format!("{}/{}", kernel.url_base, kernel.kernel);
         let kernel_cpath = cache_dir.join(&Path::new(&kernel.kernel).file_name().unwrap());
         let kernel_dpath = self.download(&kernel_url, &kernel_cpath)?;
         self.check_local(&kernel_dpath, &kernel_cpath)?;
 
         // Get disk image
-        let disk_url = format!("http://{}/{}", kernel.url_base, kernel.disk);
-        let disk_cpath = cache_dir.join(&Path::new(&kernel.disk).file_name().unwrap());
+        let disk_url = format!("{}/{}", kernel.disk.url_base, kernel.disk.path);
+        let disk_cpath = images_dir.join(&Path::new(&kernel.disk.path).file_name().unwrap());
         let disk_dpath = self.download(&disk_url, &disk_cpath)?;
         self.check_local(&disk_dpath, &disk_cpath)?;
 
         // Get ssh key
-        let key_url = format!("http://{}/{}", kernel.url_base, kernel.sshkey);
-        let key_cpath = cache_dir.join(&Path::new(&kernel.sshkey).file_name().unwrap());
+        let key_url = format!("{}/{}", kernel.disk.url_base, kernel.disk.sshkey);
+        let key_cpath = images_dir.join(&Path::new(&kernel.disk.sshkey).file_name().unwrap());
         let key_dpath = self.download(&key_url, &key_cpath)?;
         self.check_local(&key_dpath, &key_cpath)?;
 
@@ -79,11 +80,11 @@ impl Cache {
             .into_os_string()
             .into_string()
             .or(Err(BadFilePath))?;
-        kernel.disk = disk_cpath
+        kernel.disk.path = disk_cpath
             .into_os_string()
             .into_string()
             .or(Err(BadFilePath))?;
-        kernel.sshkey = key_cpath
+        kernel.disk.sshkey = key_cpath
             .into_os_string()
             .into_string()
             .or(Err(BadFilePath))?;

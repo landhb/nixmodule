@@ -10,6 +10,7 @@ pub enum NixModuleError {
     BadFilePath,
     QemuError,
     SshError,
+    BuildError,
 }
 
 impl Display for NixModuleError {
