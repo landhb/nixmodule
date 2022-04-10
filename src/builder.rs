@@ -1,8 +1,7 @@
 use crate::errors::NixModuleError::*;
 use crate::KConfig;
 use std::error::Error;
-use std::path::PathBuf;
-use std::process::{Child, Command, Stdio};
+use std::process::Command;
 
 pub struct ModuleBuilder;
 

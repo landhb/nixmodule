@@ -1,6 +1,6 @@
 use colored::*;
 use home_dir::HomeDirExt;
-use prettytable::{Row, Table};
+use prettytable::Table;
 use serde::Deserialize;
 use std::error::Error;
 use std::fs::read;
@@ -46,6 +46,15 @@ struct Config {
 #[derive(Debug, Deserialize)]
 pub struct Module {
     name: String,
+    test_script: UploadFile,
+    insmod_args: String,
+    test_files: Vec<UploadFile>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UploadFile {
+    local: String,
+    remote: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -67,9 +76,11 @@ pub struct KConfig {
     runner_extra_args: Option<Vec<String>>,
 }
 
-fn test(name: &str, kernel: &KConfig, handle: &Qemu) -> Result<(), Box<dyn Error>> {
+fn test(module: &Module, kernel: &KConfig, handle: &Qemu) -> Result<(), Box<dyn Error>> {
+    log_status!("Building module for {}", kernel.version);
+
     // Compile the module against the headers
-    let build = ModuleBuilder::build(name, &kernel)?;
+    let build = ModuleBuilder::build(&module.name, &kernel)?;
     log_success!("Build success for kernel {:?}", kernel.version);
 
     // Upload the module
@@ -79,10 +90,24 @@ fn test(name: &str, kernel: &KConfig, handle: &Qemu) -> Result<(), Box<dyn Error
     );
     handle.transfer(&build, &uploaded)?;
     log_status!("Uploaded {}", uploaded);
+
+    // Perform insmod
     handle
-        .runcmd(&format!("insmod {} ports=8000", uploaded))
+        .runcmd(&format!("insmod {} {}", uploaded, module.insmod_args))
         .or(Err(InsmodError))?;
-    log_success!("Insmod successful!");
+    log_success!("Insmod successful for {}!", kernel.version);
+
+    // Upload all test files
+    handle.transfer(&module.test_script.local, &module.test_script.remote)?;
+    for upload in &module.test_files {
+        handle.transfer(&upload.local, &upload.remote)?;
+    }
+
+    // Run the test script
+    handle
+        .runcmd(&module.test_script.remote)
+        .or(Err(TestError))?;
+
     Ok(())
 }
 
@@ -90,8 +115,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Obtain the running config
     let opt = Opt::from_args();
     let config: Config = toml::from_slice(&read(opt.config)?)?;
-
-    println!("{:#?}", config);
 
     // Init the cache
     let cache = Cache::new(&config.cache.expand_home()?);
@@ -107,32 +130,31 @@ fn main() -> Result<(), Box<dyn Error>> {
         // Start qemu with the config
         let handle = Qemu::start(&kernel)?;
 
-        let mut row = row![kernel.version, "N/A".blue(), "N/A".blue(), "N/A".blue()];
-
-        match test(&config.module.name, &kernel, &handle) {
+        // Create results row
+        let mut row = row![kernel.version, Fb->"N/A", "N/A".blue(), "N/A".blue()];
+        match test(&config.module, &kernel, &handle) {
             Err(x) if x.downcast_ref::<NixModuleError>() == Some(&BuildError) => {
-                row.set_cell(cell!("Failed".red()), 1);
+                row.set_cell(cell!(Fr->"Failed"), 1)?;
             }
             Err(x) if x.downcast_ref::<NixModuleError>() == Some(&InsmodError) => {
-                row.set_cell(cell!("Ok".green()), 1);
-                row.set_cell(cell!("Failed".red()), 2);
+                row.set_cell(cell!(Fg->"Ok"), 1)?;
+                row.set_cell(cell!(Fr->"Failed"), 2)?;
             }
             Err(x) if x.downcast_ref::<NixModuleError>() == Some(&TestError) => {
-                row.set_cell(cell!("Ok".green()), 1);
-                row.set_cell(cell!("Ok".green()), 2);
-                row.set_cell(cell!("Failed".red()), 3);
+                row.set_cell(cell!(Fg->"Ok"), 1)?;
+                row.set_cell(cell!(Fg->"Ok"), 2)?;
+                row.set_cell(cell!(Fr->"Failed"), 3)?;
             }
             Ok(_) => {
-                row.set_cell(cell!("Ok".green()), 1);
-                row.set_cell(cell!("Ok".green()), 2);
-                row.set_cell(cell!("Ok".green()), 3);
+                row.set_cell(cell!(Fg->"Ok"), 1)?;
+                row.set_cell(cell!(Fg->"Ok"), 2)?;
+                row.set_cell(cell!(Fg->"Ok"), 3)?;
             }
             _ => {}
         }
         table.add_row(row);
 
         // Wait and stop qemu
-        std::thread::sleep(std::time::Duration::new(3, 0));
         handle.stop()?;
     }
 

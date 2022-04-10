@@ -1,8 +1,8 @@
 use crate::errors::NixModuleError::*;
 use crate::KConfig;
+use rand::Rng;
 use std::error::Error;
-use std::net::TcpStream;
-use std::path::Path;
+use std::net::{SocketAddr, TcpStream};
 use std::process::{Child, Command, Stdio};
 use std::thread::sleep;
 use std::time::Duration;
@@ -10,12 +10,22 @@ use std::time::Duration;
 pub struct Qemu {
     handle: Child,
     sshkey: String,
+    sshport: String,
+}
+
+fn print_output(out: &str) {
+    for line in out.split("\n") {
+        println!("{}", line);
+    }
 }
 
 impl Qemu {
     /// Start Qemu with the provided configuration
     pub fn start(kernel: &KConfig) -> Result<Self, Box<dyn Error>> {
         let mut qemu = Command::new(&kernel.runner);
+
+        // Generate random high port for ssh
+        let port: u16 = rand::thread_rng().gen_range(1025..=65535);
 
         // Optional args
         match &kernel.runner_extra_args {
@@ -24,6 +34,8 @@ impl Qemu {
             }
             _ => {}
         }
+
+        let fwd = format!("user,host=10.0.2.10,hostfwd=tcp:127.0.0.1:{}-:22", port);
 
         // Kick of the process
         let res = Self {
@@ -35,10 +47,7 @@ impl Qemu {
                     "console=ttyS0 root=/dev/sda earlyprintk=serial net.ifnames=0 nokaslr",
                 ])
                 .args(["-drive", &format!("file={},format=raw", &kernel.disk.path)])
-                .args([
-                    "-net",
-                    "user,host=10.0.2.10,hostfwd=tcp:127.0.0.1:10021-:22",
-                ])
+                .args(["-net", &fwd])
                 .args(["-net", "nic,model=e1000"])
                 .arg("-enable-kvm")
                 .arg("-nographic")
@@ -49,12 +58,13 @@ impl Qemu {
                 .spawn()
                 .or(Err(QemuError))?,
             sshkey: kernel.disk.sshkey.clone(),
-            //config: kernel,
+            sshport: port.to_string(),
         };
 
         // Wait until boot is complete/ssh is open
-        while let Err(inn) = TcpStream::connect("127.0.0.1:10021") {
-            sleep(Duration::new(2, 0));
+        let addr = SocketAddr::from(([127, 0, 0, 1], port));
+        while let Err(_) = TcpStream::connect(addr) {
+            sleep(Duration::new(5, 0));
         }
 
         Ok(res)
@@ -64,7 +74,7 @@ impl Qemu {
         println!("Running {}", cmd);
         let res = Command::new("ssh")
             .args(["-i", &self.sshkey])
-            .args(["-p", "10021"])
+            .args(["-p", &self.sshport])
             .args(["-oStrictHostKeyChecking=no"])
             .arg("root@localhost")
             .arg(cmd)
@@ -73,7 +83,8 @@ impl Qemu {
         match res.status.success() {
             true => Ok(()),
             false => {
-                println!("{:?}", std::str::from_utf8(&res.stderr)?);
+                print_output(std::str::from_utf8(&res.stderr)?);
+                print_output(std::str::from_utf8(&res.stdout)?);
                 Err(SshError.into())
             }
         }
@@ -84,7 +95,7 @@ impl Qemu {
         println!("Uploading {}", local);
         let res = Command::new("scp")
             .args(["-i", &self.sshkey])
-            .args(["-P", "10021"])
+            .args(["-P", &self.sshport])
             .args(["-oStrictHostKeyChecking=no"])
             .arg(local)
             .arg(format!("root@localhost:{}", remote))
