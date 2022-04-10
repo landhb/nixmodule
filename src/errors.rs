@@ -5,12 +5,14 @@ use core::fmt::Result;
 use std::error::Error;
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum NixModuleError {
     BadFilePath,
     QemuError,
     SshError,
     BuildError,
+    InsmodError,
+    TestError,
 }
 
 impl Display for NixModuleError {
