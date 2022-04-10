@@ -36,7 +36,7 @@ impl Qemu {
         // Kick of the process
         let res = Self {
             handle: qemu
-                .args(["-m", "2G", "-smp", "2"])
+                .args(["-m", "512M", "-smp", "2"])
                 .args(["-kernel", &kernel.kernel])
                 .args([
                     "-append",
@@ -56,6 +56,8 @@ impl Qemu {
             sshkey: kernel.disk.sshkey.clone(),
             sshport: port.to_string(),
         };
+
+        log_status!("Waiting for VM to boot...");
 
         // Wait until boot is complete/ssh is open
         let addr = SocketAddr::from(([127, 0, 0, 1], port));

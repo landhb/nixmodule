@@ -1,25 +1,58 @@
 
-## How to Use
+# NixModule
+
+
+
+## Pre-Built Kernels
+
+| Version | BzImage | Headers |
+
+## Pre-Built Disk Images
+
+
+
+## Using Other Kernels
 
 Use the packing script
 
 ```sh
-KERNEL=linux-4.14.275 ./scripts/package.sh
+KERNEL=4.14.275 ./scripts/package.sh
 ```
 
-Build the kernel by following the instructions in BUILDING_IMAGES.md
+This builds the required `bzImage` and an archive `linux-$VERSION-headers.tar.gz` containing the headers/module info required to build an out-of-tree kernel module.
 
+Then add the new kernel to your configuration file `nixmodule-config.toml`:
 
+```toml
+[[kernels]]
+version = "4.19.237"
+url_base = "https://files.sboc.dev"
+headers = "linux-headers/linux-4.19.237-headers.tar.gz" 
+kernel = "linux-kernels/bzImage-linux-4.19.237"
+runner = "qemu-system-x86_64"
 
-then run this to create the necessary header export:
-
-```sh
-KCONFIG_CONFIG=.config SRCARCH=x86 objtree=linux-5.8.9/ srctree=linux-5.8.9/ ./module_headers_install.sh
+[kernels.disk]
+name = "stretch"
+url_base = "https://files.sboc.dev"
+path = "images/stretch/stretch.img"
+sshkey = "images/stretch/stretch.id_rsa"
 ```
 
-then tar it for future use:
+## Using Other Disk Images
 
-```sh
-cd linux-modules-headers
-tar -czvf ../linux-5.8.9-headers.tar.gz *
+Fill out the `[kernels.disk]` entry for the kernel you'd like to use the new disk with:
+
+```toml
+[kernels.disk]
+name = "stretch"
+url_base = "https://files.sboc.dev"
+path = "images/stretch/stretch.img"
+sshkey = "images/stretch/stretch.id_rsa"
+boot = "/dev/sda"
+```
+
+Boot should contain the partition to boot from. This is passed directly to qemu to append as kernel arugments as:
+
+```
+-append "console=ttyS0 root=$BOOT earlyprintk=serial net.ifnames=0 nokaslr"
 ```
