@@ -1,3 +1,4 @@
+use colored::*;
 use reqwest::blocking::Client;
 use reqwest::Url;
 use std::error::Error;
@@ -41,7 +42,7 @@ impl Cache {
     ///
     /// This initiates a download if the file isn't present
     pub fn get(&self, kernel: &mut KConfig) -> Result<(), Box<dyn Error>> {
-        println!("Checking artifacts for Linux Kernel {}", kernel.version);
+        log_status!("Checking artifacts for Linux Kernel {}", kernel.version);
 
         // The cache folder for this KConfig
         let cache_dir = self.dir.as_path().join("cache").join(&kernel.version);
@@ -94,8 +95,6 @@ impl Cache {
 
     /// Checks the cache path, or unpacks an existing download
     fn check_local(&self, dpath: &PathBuf, cpath: &PathBuf) -> Result<(), Box<dyn Error>> {
-        println!("Checking for {:?}", cpath);
-
         // This response is already cached
         if cpath.as_path().exists() {
             return Ok(());
@@ -133,7 +132,7 @@ impl Cache {
             return Ok(fname);
         }
 
-        println!("Downloading {}", uri);
+        log_status!("Downloading {}", uri);
 
         // Actually perform the request
         let client = Client::new();
@@ -169,7 +168,6 @@ impl Cache {
     ) -> Result<(), Box<dyn Error>> {
         match atype {
             ArchiveType::TarGz => {
-                println!("Unpacking {:?} into {:?}", file, outdir);
                 let tar_gz = File::open(file)?;
                 let tar = GzDecoder::new(tar_gz);
                 let mut archive = Archive::new(tar);

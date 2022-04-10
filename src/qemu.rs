@@ -1,5 +1,6 @@
 use crate::errors::NixModuleError::*;
 use crate::KConfig;
+use colored::*;
 use rand::Rng;
 use std::error::Error;
 use std::net::{SocketAddr, TcpStream};
@@ -71,7 +72,7 @@ impl Qemu {
     }
 
     pub fn runcmd(&self, cmd: &str) -> Result<(), Box<dyn Error>> {
-        println!("Running {}", cmd);
+        log_status!("Running {}", cmd);
         let res = Command::new("ssh")
             .args(["-i", &self.sshkey])
             .args(["-p", &self.sshport])
@@ -92,7 +93,7 @@ impl Qemu {
 
     /// Transfer a file into the running VM
     pub fn transfer(&self, local: &str, remote: &str) -> Result<(), Box<dyn Error>> {
-        println!("Uploading {}", local);
+        log_status!("Uploading {}", local);
         let res = Command::new("scp")
             .args(["-i", &self.sshkey])
             .args(["-P", &self.sshport])
