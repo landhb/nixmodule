@@ -9,6 +9,7 @@ use std::error::Error;
 pub enum NixModuleError {
     BadFilePath,
     QemuError,
+    SshError,
 }
 
 impl Display for NixModuleError {

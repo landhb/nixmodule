@@ -4,6 +4,8 @@ use std::error::Error;
 use std::ffi::OsStr;
 use std::fs;
 use std::fs::File;
+use std::fs::Permissions;
+use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 
 use crate::errors::NixModuleError::*;
@@ -62,6 +64,12 @@ impl Cache {
         let disk_dpath = self.download(&disk_url, &disk_cpath)?;
         self.check_local(&disk_dpath, &disk_cpath)?;
 
+        // Get ssh key
+        let key_url = format!("http://{}/{}", kernel.url_base, kernel.sshkey);
+        let key_cpath = cache_dir.join(&Path::new(&kernel.sshkey).file_name().unwrap());
+        let key_dpath = self.download(&key_url, &key_cpath)?;
+        self.check_local(&key_dpath, &key_cpath)?;
+
         // Update the local paths
         kernel.headers = headers_cpath
             .into_os_string()
@@ -72,6 +80,10 @@ impl Cache {
             .into_string()
             .or(Err(BadFilePath))?;
         kernel.disk = disk_cpath
+            .into_os_string()
+            .into_string()
+            .or(Err(BadFilePath))?;
+        kernel.sshkey = key_cpath
             .into_os_string()
             .into_string()
             .or(Err(BadFilePath))?;
@@ -95,6 +107,7 @@ impl Cache {
             }
             _ => {
                 fs::rename(&dpath, &cpath)?;
+                fs::set_permissions(&cpath, Permissions::from_mode(0o600))?;
             }
         }
         Ok(())
