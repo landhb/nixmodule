@@ -4,10 +4,11 @@ use crate::KConfig;
 use colored::*;
 use rand::Rng;
 use std::error::Error;
+use std::io::Read;
 use std::net::{SocketAddr, TcpStream};
 use std::process::{Child, Command, Stdio};
 use std::thread::sleep;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 pub struct Qemu {
     handle: Child,
@@ -18,6 +19,7 @@ pub struct Qemu {
 impl Qemu {
     /// Start Qemu with the provided configuration
     pub fn start(kernel: &KConfig) -> Result<Self, Box<dyn Error>> {
+        let timeout = Duration::new(30, 0);
         let mut qemu = Command::new(&kernel.runner);
 
         // Generate random high port for ssh
@@ -32,16 +34,17 @@ impl Qemu {
         }
 
         let fwd = format!("user,host=10.0.2.10,hostfwd=tcp:127.0.0.1:{}-:22", port);
+        let bootargs = format!(
+            "console=ttyS0 root={} earlyprintk=serial net.ifnames=0 nokaslr",
+            kernel.disk.boot
+        );
 
         // Kick of the process
         let res = Self {
             handle: qemu
                 .args(["-m", "512M", "-smp", "2"])
                 .args(["-kernel", &kernel.kernel])
-                .args([
-                    "-append",
-                    "console=ttyS0 root=/dev/sda earlyprintk=serial net.ifnames=0 nokaslr",
-                ])
+                .args(["-append", &bootargs])
                 .args(["-drive", &format!("file={},format=raw", &kernel.disk.path)])
                 .args(["-net", &fwd])
                 .args(["-net", "nic,model=e1000"])
@@ -59,10 +62,26 @@ impl Qemu {
 
         log_status!("Waiting for VM to boot...");
 
-        // Wait until boot is complete/ssh is open
+        // Wait until boot is complete/port is open
         let addr = SocketAddr::from(([127, 0, 0, 1], port));
-        while let Err(_) = TcpStream::connect(addr) {
-            sleep(Duration::new(5, 0));
+        let start = Instant::now();
+        while let Err(_) = TcpStream::connect_timeout(&addr, timeout) {
+            if start.elapsed().as_secs() > 60 {
+                return Err(TimeoutError.into());
+            }
+            sleep(Duration::new(7, 0));
+        }
+
+        // Wait for ssh service to start
+        let mut buf = [0u8; 8];
+        let mut stream = TcpStream::connect_timeout(&addr, timeout)?;
+        stream.set_read_timeout(Some(timeout))?;
+        let start = Instant::now();
+        while let Err(_) = stream.read(&mut buf) {
+            if start.elapsed().as_secs() > 60 {
+                return Err(TimeoutError.into());
+            }
+            sleep(Duration::new(7, 0));
         }
 
         Ok(res)

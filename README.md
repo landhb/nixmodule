@@ -1,7 +1,7 @@
 
 # NixModule [![cargo-badge][]][cargo-link]
 
-Automatically test out-of-tree linux kernel modules across multiple kernel versions. The provided images all have `KASAN`, to aide your development.
+Automatically test out-of-tree linux kernel modules across multiple kernel versions. The provided images all have `KASAN` to aide your development.
 
 ```sh
 cargo install nixmodule
@@ -13,7 +13,7 @@ cargo install nixmodule
 - [Using Other Disk Images](#using-other-disks)  
 
 
-Example below running it against a single kernel, running without arguments tests against every kernel in your [`nixmodule-config.toml`]():
+Example below running it against a single kernel, running without arguments tests against every kernel in your [`nixmodule-config.toml`](example/nixmodule-config.toml):
 
 <p align="center">
   <img src="img/filter.png">
@@ -21,7 +21,7 @@ Example below running it against a single kernel, running without arguments test
 
 ## Pre-Built Kernels <a name="pre-built-kernels"/>
 
-Check [`nixmodule-config.toml`]() for an example configuration using all of these images.
+Check [`nixmodule-config.toml`](example/nixmodule-config.toml) for an example configuration using all of these images.
 
 | Version | BzImage   | Headers |
 | :---:   | :---:     | :---:   |
@@ -80,7 +80,7 @@ sshkey = "images/stretch/stretch.id_rsa"
 boot = "/dev/sda"
 ```
 
-Boot should contain the partition to boot from. This is passed directly to qemu to append as kernel arugments as:
+Boot should contain the partition to boot from. This is passed to qemu to append as kernel arguments:
 
 ```
 -append "console=ttyS0 root=$BOOT earlyprintk=serial net.ifnames=0 nokaslr"

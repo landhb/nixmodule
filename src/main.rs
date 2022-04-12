@@ -67,10 +67,10 @@ pub struct UploadFile {
 
 #[derive(Debug, Deserialize)]
 pub struct DiskImage {
-    name: String,
     url_base: String,
     path: String,
     sshkey: String,
+    boot: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -96,7 +96,7 @@ fn test(module: &Module, kernel: &KConfig, handle: &Qemu) -> Result<(), Box<dyn 
         "/tmp/{:?}",
         Path::new(&build).file_name().ok_or(BadFilePath)?
     );
-    handle.transfer(&build, &uploaded)?;
+    handle.transfer(&build, &uploaded).or(Err(InsmodError))?;
     log_status!("Uploaded {}", uploaded);
 
     // Perform insmod
@@ -106,7 +106,9 @@ fn test(module: &Module, kernel: &KConfig, handle: &Qemu) -> Result<(), Box<dyn 
     log_success!("Insmod successful for {}!", kernel.version);
 
     // Upload all test files
-    handle.transfer(&module.test_script.local, &module.test_script.remote)?;
+    handle
+        .transfer(&module.test_script.local, &module.test_script.remote)
+        .or(Err(TestError))?;
     for upload in &module.test_files {
         handle.transfer(&upload.local, &upload.remote)?;
     }

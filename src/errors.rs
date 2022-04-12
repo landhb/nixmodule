@@ -13,6 +13,7 @@ pub enum NixModuleError {
     BuildError,
     InsmodError,
     TestError,
+    TimeoutError,
 }
 
 impl Display for NixModuleError {

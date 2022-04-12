@@ -1,7 +1,17 @@
 [package]
 name = "nixmodule"
 version = "0.1.0"
+authors = ["landhb <landhb@github>"]
 edition = "2021"
+description = """
+Automatically test out-of-tree linux kernel modules across multiple kernel versions.
+The provided images all have `KASAN` to aide your development.
+"""
+homepage = "https://github.com/landhb/nixmodule"
+repository = "https://github.com/landhb/nixmodule"
+keywords = ["testing", "lkm", "out-of-tree", "linux-kernel","qemu", "qemu-kvm", "linux"]
+readme = "README.md"
+license = "Apache-2.0 OR MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

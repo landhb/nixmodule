@@ -1,0 +1,136 @@
+#######################################################
+# Cache Config
+#######################################################
+cache = "~/.cache/nixmodule"
+
+#######################################################
+# Module Config
+#######################################################
+
+[module]
+name = "example"
+insmod_args = "ports=8000"
+
+[module.test_script]
+local = "./scripts/test.sh"
+remote = "/tmp/test.sh"
+
+# Example of transferring another file
+[[module.test_files]]
+local = "./README.md"
+remote = "/tmp/README.md"
+
+#######################################################
+# 5.17.2 Test
+#######################################################
+[[kernels]]
+version = "5.17.2"
+url_base = "https://files.sboc.dev"
+headers = "linux-headers/linux-5.17.2-headers.tar.gz" 
+kernel = "linux-kernels/bzImage-5.17.2"
+runner = "qemu-system-x86_64"
+
+[kernels.disk]
+name = "stretch"
+url_base = "https://files.sboc.dev"
+path = "images/stretch/stretch.img"
+sshkey = "images/stretch/stretch.id_rsa"
+boot = "/dev/sda"
+
+#######################################################
+# 5.8.9 Test
+#######################################################
+[[kernels]]
+version = "5.8.9"
+url_base = "https://files.sboc.dev"
+headers = "linux-headers/linux-5.8.9-headers.tar.gz" 
+kernel = "linux-kernels/bzImage-5.8.9"
+runner = "qemu-system-x86_64"
+
+[kernels.disk]
+url_base = "https://files.sboc.dev"
+path = "images/stretch/stretch.img"
+sshkey = "images/stretch/stretch.id_rsa"
+boot = "/dev/sda"
+
+
+#######################################################
+# 5.4.188
+#######################################################
+[[kernels]]
+version = "5.4.188"
+url_base = "https://files.sboc.dev"
+headers = "linux-headers/linux-5.4.188-headers.tar.gz" 
+kernel = "linux-kernels/bzImage-linux-5.4.188"
+runner = "qemu-system-x86_64"
+
+[kernels.disk]
+url_base = "https://files.sboc.dev"
+path = "images/stretch/stretch.img"
+sshkey = "images/stretch/stretch.id_rsa"
+boot = "/dev/sda"
+
+
+#######################################################
+# 4.19.237
+#######################################################
+[[kernels]]
+version = "4.19.237"
+url_base = "https://files.sboc.dev"
+headers = "linux-headers/linux-4.19.237-headers.tar.gz" 
+kernel = "linux-kernels/bzImage-linux-4.19.237"
+runner = "qemu-system-x86_64"
+
+[kernels.disk]
+url_base = "https://files.sboc.dev"
+path = "images/stretch/stretch.img"
+sshkey = "images/stretch/stretch.id_rsa"
+boot = "/dev/sda"
+
+#######################################################
+# 4.14.275
+#######################################################
+[[kernels]]
+version = "4.14.275"
+url_base = "https://files.sboc.dev"
+headers = "linux-headers/linux-4.14.275-headers.tar.gz" 
+kernel = "linux-kernels/bzImage-linux-4.14.275"
+runner = "qemu-system-x86_64"
+
+[kernels.disk]
+url_base = "https://files.sboc.dev"
+path = "images/stretch/stretch.img"
+sshkey = "images/stretch/stretch.id_rsa"
+boot = "/dev/sda"
+
+#######################################################
+# 4.9.309
+#######################################################
+[[kernels]]
+version = "4.9.309"
+url_base = "https://files.sboc.dev"
+headers = "linux-headers/linux-4.9.309-headers.tar.gz" 
+kernel = "linux-kernels/bzImage-linux-4.9.309"
+runner = "qemu-system-x86_64"
+
+[kernels.disk]
+url_base = "https://files.sboc.dev"
+path = "images/stretch/stretch.img"
+sshkey = "images/stretch/stretch.id_rsa"
+boot = "/dev/sda"
+
+#######################################################
+# 4.1.52
+#######################################################
+[[kernels]]
+version = "4.1.52"
+url_base = "https://files.sboc.dev"
+headers = "linux-headers/linux-4.1.52-headers.tar.gz" 
+kernel = "linux-kernels/bzImage-4.1.52"
+runner = "qemu-system-x86_64"
+
+[kernels.disk]
+url_base = "https://files.sboc.dev"
+path = "images/stretch/stretch.img"
+sshkey = "images/stretch/stretch.id_rsa"
+boot = "/dev/sda"
