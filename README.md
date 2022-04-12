@@ -9,13 +9,15 @@ Automatically test out-of-tree linux kernel modules across multiple kernel versi
 - [Using Other Disk Images](#using-other-disks)  
 
 
-Example running it against a single kernel:
+Example below running it against a single kernel, running without arguments tests against every kernel in your [`nixmodule-config.toml`]():
 
 <p align="center">
   <img src="img/filter.png">
 </p>
 
 ## Pre-Built Kernels <a name="pre-built-kernels"/>
+
+Check [`nixmodule-config.toml`]() for an example configuration using all of these images.
 
 | Version | BzImage   | Headers |
 | :---:   | :---:     | :---:   |

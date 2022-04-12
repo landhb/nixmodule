@@ -28,8 +28,7 @@ extern crate prettytable;
 #[derive(StructOpt, Debug)]
 #[structopt(name = "nixmodule")]
 struct Opt {
-    /// Path to a configuration file, defaults to
-    /// ./nixmodule-config.toml in the current directory
+    /// Path to a configuration file
     #[structopt(
         short = "c",
         long = "config",
@@ -38,6 +37,9 @@ struct Opt {
     config: PathBuf,
 
     /// Run suite for a specific kernel version
+    /// or any kernel that starts with this value
+    /// (i.e 5 will run every 5.X.X vs 5.1 which will
+    /// only run 5.1*)
     #[structopt(short = "k", long = "kernel")]
     kernel: Option<String>,
 }
