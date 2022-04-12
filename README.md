@@ -1,7 +1,11 @@
 
-# NixModule
+# NixModule [![cargo-badge][]][cargo-link]
 
 Automatically test out-of-tree linux kernel modules across multiple kernel versions. The provided images all have `KASAN`, to aide your development.
+
+```sh
+cargo install nixmodule
+```
 
 - [Pre-Built Kernels](#pre-built-kernels)  
 - [Pre-Built Disk Images](#pre-built-disks)  
@@ -81,3 +85,7 @@ Boot should contain the partition to boot from. This is passed directly to qemu 
 ```
 -append "console=ttyS0 root=$BOOT earlyprintk=serial net.ifnames=0 nokaslr"
 ```
+
+[//]: # (badges/links)
+[cargo-badge]: https://img.shields.io/crates/v/nixmodule.svg?label=crates.io
+[cargo-link]: https://crates.io/crates/nixmodule
