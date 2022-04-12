@@ -28,12 +28,18 @@ extern crate prettytable;
 #[derive(StructOpt, Debug)]
 #[structopt(name = "nixmodule")]
 struct Opt {
+    /// Path to a configuration file, defaults to
+    /// ./nixmodule-config.toml in the current directory
     #[structopt(
         short = "c",
         long = "config",
         default_value = "./nixmodule-config.toml"
     )]
     config: PathBuf,
+
+    /// Run suite for a specific kernel version
+    #[structopt(short = "k", long = "kernel")]
+    kernel: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -114,7 +120,7 @@ fn test(module: &Module, kernel: &KConfig, handle: &Qemu) -> Result<(), Box<dyn 
 fn main() -> Result<(), Box<dyn Error>> {
     // Obtain the running config
     let opt = Opt::from_args();
-    let config: Config = toml::from_slice(&read(opt.config)?)?;
+    let mut config: Config = toml::from_slice(&read(opt.config)?)?;
 
     // Init the cache
     let cache = Cache::new(&config.cache.expand_home()?);
@@ -123,7 +129,18 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut table = Table::new();
     table.add_row(row![Fy->"Version", Fy->"Build", Fy->"Insmod", Fy->"Tests"]);
 
-    for mut kernel in config.kernels {
+    // Optionally filter for specific version
+    let kernel_iter: Box<dyn Iterator<Item = &mut KConfig>> = match opt.kernel {
+        Some(_) => Box::new(
+            config
+                .kernels
+                .iter_mut()
+                .filter(|v| v.version.starts_with(opt.kernel.as_ref().unwrap())),
+        ),
+        None => Box::new(config.kernels.iter_mut()),
+    };
+
+    for mut kernel in kernel_iter {
         // Download or retrieve cached items
         cache.get(&mut kernel)?;
 
