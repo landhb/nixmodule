@@ -1,24 +1,19 @@
 
 # NixModule
 
-Automatically test out-of-tree linux kernel modules across multiple kernel versions. The provided images all have KASAN, to aide your development.
-
-Example running it against a single kernel:
-
-<p align="center">
-  <img width="460" height="300" src="img/filter.png">
-</p>
-
-Results table for multiple kernels:
-
-<p align="center">
-  <img width="460" height="300" src="img/results.png">
-</p>
+Automatically test out-of-tree linux kernel modules across multiple kernel versions. The provided images all have `KASAN`, to aide your development.
 
 - [Pre-Built Kernels](#pre-built-kernels)  
 - [Pre-Built Disk Images](#pre-built-disks)  
 - [Using Other Kernels](#using-other-kernels)  
 - [Using Other Disk Images](#using-other-disks)  
+
+
+Example running it against a single kernel:
+
+<p align="center">
+  <img src="img/filter.png">
+</p>
 
 ## Pre-Built Kernels <a name="pre-built-kernels"/>
 
