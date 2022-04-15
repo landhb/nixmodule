@@ -27,7 +27,7 @@ remote = "/tmp/README.md"
 version = "5.17.2"
 url_base = "https://files.sboc.dev"
 headers = "linux-headers/linux-5.17.2-headers.tar.gz" 
-kernel = "linux-kernels/bzImage-5.17.2"
+kernel = "linux-kernels/bzImage-linux-5.17.2"
 runner = "qemu-system-x86_64"
 
 [kernels.disk]
@@ -76,7 +76,7 @@ boot = "/dev/sda"
 version = "5.8.9"
 url_base = "https://files.sboc.dev"
 headers = "linux-headers/linux-5.8.9-headers.tar.gz" 
-kernel = "linux-kernels/bzImage-5.8.9"
+kernel = "linux-kernels/bzImage-linux-5.8.9"
 runner = "qemu-system-x86_64"
 
 [kernels.disk]
