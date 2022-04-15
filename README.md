@@ -1,7 +1,7 @@
 
 # NixModule [![cargo-badge][]][cargo-link]
 
-Simple qemu-kvm wrapper to automatically test out-of-tree linux kernel modules across multiple kernel versions. The provided images all have `KASAN` to aide your development.
+Simple qemu wrapper to automatically test out-of-tree linux kernel modules across multiple kernel versions. The provided images all have `KASAN` to aide your development.
 
 ```sh
 cargo install nixmodule
@@ -67,8 +67,22 @@ name = "stretch"
 url_base = "https://files.sboc.dev"
 path = "images/stretch/stretch.img"
 sshkey = "images/stretch/stretch.id_rsa"
+boot = "/dev/sda"
 ```
 
+You can optionally disable kvm with:
+
+```toml
+kvm = false
+```
+
+And increase the boot timeout with:
+
+```toml
+timeout = 600
+```
+
+Without kvm you'll likely need to increase the default the timeout.
 
 ## Using Other Disk Images <a name="using-other-disks"/>
 

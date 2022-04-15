@@ -1,10 +1,10 @@
 [package]
 name = "nixmodule"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["landhb <landhb@github>"]
 edition = "2021"
 description = """
-Simple qemu-kvm wrapper to automatically test out-of-tree linux kernel modules across multiple kernel versions.
+Simple qemu wrapper to automatically test out-of-tree linux kernel modules across multiple kernel versions.
 """
 homepage = "https://github.com/landhb/nixmodule"
 repository = "https://github.com/landhb/nixmodule"

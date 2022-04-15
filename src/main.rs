@@ -82,8 +82,21 @@ pub struct KConfig {
     disk: DiskImage,
     runner: String,
     runner_extra_args: Option<Vec<String>>,
+
+    // Allow users to disable kvm
+    #[serde(default = "enable_kvm")]
+    kvm: bool,
+
+    // Allow users to increase timeout
+    timeout: Option<u64>,
 }
 
+/// Speed things up by enabling by default
+fn enable_kvm() -> bool {
+    true
+}
+
+/// Run through the test
 fn test(module: &Module, kernel: &KConfig, handle: &Qemu) -> Result<(), Box<dyn Error>> {
     log_status!("Building module for {}", kernel.version);
 

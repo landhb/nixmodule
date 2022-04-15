@@ -19,7 +19,7 @@ pub struct Qemu {
 impl Qemu {
     /// Start Qemu with the provided configuration
     pub fn start(kernel: &KConfig) -> Result<Self, Box<dyn Error>> {
-        let timeout = Duration::new(30, 0);
+        let timeout = Duration::new(kernel.timeout.map_or(60, |v| v), 0);
         let mut qemu = Command::new(&kernel.runner);
 
         // Generate random high port for ssh
@@ -31,6 +31,11 @@ impl Qemu {
                 qemu.args(extra);
             }
             _ => {}
+        }
+
+        // KVM?
+        if kernel.kvm {
+            qemu.arg("-enable-kvm");
         }
 
         let fwd = format!("user,host=10.0.2.10,hostfwd=tcp:127.0.0.1:{}-:22", port);
@@ -48,7 +53,6 @@ impl Qemu {
                 .args(["-drive", &format!("file={},format=raw", &kernel.disk.path)])
                 .args(["-net", &fwd])
                 .args(["-net", "nic,model=e1000"])
-                .arg("-enable-kvm")
                 .arg("-nographic")
                 .args(["-pidfile", "vm.pid"])
                 .stdin(Stdio::null())
@@ -61,12 +65,21 @@ impl Qemu {
         };
 
         log_status!("Waiting for VM to boot...");
+        if let Err(e) = res.wait_for_boot(port, timeout) {
+            res.stop()?;
+            return Err(e);
+        }
 
+        Ok(res)
+    }
+
+    /// hacky workaround to wait for boot to finish
+    fn wait_for_boot(&self, port: u16, timeout: Duration) -> Result<(), Box<dyn Error>> {
         // Wait until boot is complete/port is open
         let addr = SocketAddr::from(([127, 0, 0, 1], port));
         let start = Instant::now();
         while let Err(_) = TcpStream::connect_timeout(&addr, timeout) {
-            if start.elapsed().as_secs() > 60 {
+            if start.elapsed() > timeout {
                 return Err(TimeoutError.into());
             }
             sleep(Duration::new(7, 0));
@@ -78,13 +91,12 @@ impl Qemu {
         stream.set_read_timeout(Some(timeout))?;
         let start = Instant::now();
         while let Err(_) = stream.read(&mut buf) {
-            if start.elapsed().as_secs() > 60 {
+            if start.elapsed() > timeout {
                 return Err(TimeoutError.into());
             }
             sleep(Duration::new(7, 0));
         }
-
-        Ok(res)
+        Ok(())
     }
 
     pub fn runcmd(&self, cmd: &str) -> Result<(), Box<dyn Error>> {
