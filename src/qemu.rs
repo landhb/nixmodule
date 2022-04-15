@@ -130,6 +130,7 @@ impl Qemu {
     /// Stop the background qemu instance
     pub fn stop(mut self) -> Result<(), Box<dyn Error>> {
         self.handle.kill()?;
+        self.handle.wait()?;
         Ok(())
     }
 }
