@@ -23,21 +23,24 @@ Example below running it against a single kernel, running without arguments test
 
 Check [`nixmodule-config.toml`](example/nixmodule-config.toml) for an example configuration using all of these images.
 
-| Version | BzImage   | Headers |
-| :---:   | :---:     | :---:   |
-| 5.17.2  | [bZimage](https://files.sboc.dev/linux-kernels/bzImage-5.17.2) | [Headers](https://files.sboc.dev/linux-headers/linux-5.17.2-headers.tar.gz)| 
-| 5.8.9   | [bZimage](https://files.sboc.dev/linux-kernels/bzImage-5.8.9)  | [Headers](https://files.sboc.dev/linux-headers/linux-5.8.9-headers.tar.gz)| 
-| 5.4.188 | [bZimage](https://files.sboc.dev/linux-kernels/bzImage-5.4.188)| [Headers](https://files.sboc.dev/linux-headers/linux-5.4.188-headers.tar.gz)| 
-| 4.19.237| [bZimage](https://files.sboc.dev/linux-kernels/bzImage-4.19.237) | [Headers](https://files.sboc.dev/linux-headers/linux-4.19.237-headers.tar.gz)| 
-| 4.14.275| [bZimage](https://files.sboc.dev/linux-kernels/bzImage-4.14.275) | [Headers](https://files.sboc.dev/linux-headers/linux-4.14.275-headers.tar.gz)| 
-| 4.9.309| [bZimage](https://files.sboc.dev/linux-kernels/bzImage-4.9.309) | [Headers](https://files.sboc.dev/linux-headers/linux-4.4.309-headers.tar.gz)| 
-| 4.1.52| [bZimage](https://files.sboc.dev/linux-kernels/bzImage-4.1.52) | [Headers](https://files.sboc.dev/linux-headers/linux-4.1.52-headers.tar.gz)| 
+| Version | BzImage   | Headers | LTS? |
+| :---:   | :---:     | :---:   | :---:   | 
+| 5.17.2  | [bZimage](https://files.sboc.dev/linux-kernels/bzImage-5.17.2) | [Headers](https://files.sboc.dev/linux-headers/linux-5.17.2-headers.tar.gz)|    | 
+| 5.15.33   | [bZimage](https://files.sboc.dev/linux-kernels/bzImage-5.15.33)  | [Headers](https://files.sboc.dev/linux-headers/linux-5.15.33-headers.tar.gz)|  Yes  | 
+| 5.10.110   | [bZimage](https://files.sboc.dev/linux-kernels/bzImage-5.10.110)  | [Headers](https://files.sboc.dev/linux-headers/linux-5.10.110-headers.tar.gz)|  Yes  | 
+| 5.8.9   | [bZimage](https://files.sboc.dev/linux-kernels/bzImage-5.8.9)  | [Headers](https://files.sboc.dev/linux-headers/linux-5.8.9-headers.tar.gz)|    | 
+| 5.4.188 | [bZimage](https://files.sboc.dev/linux-kernels/bzImage-5.4.188)| [Headers](https://files.sboc.dev/linux-headers/linux-5.4.188-headers.tar.gz)| Yes  | 
+| 4.19.237| [bZimage](https://files.sboc.dev/linux-kernels/bzImage-4.19.237) | [Headers](https://files.sboc.dev/linux-headers/linux-4.19.237-headers.tar.gz)| Yes  | 
+| 4.14.275| [bZimage](https://files.sboc.dev/linux-kernels/bzImage-4.14.275) | [Headers](https://files.sboc.dev/linux-headers/linux-4.14.275-headers.tar.gz)| Yes | 
+| 4.9.309| [bZimage](https://files.sboc.dev/linux-kernels/bzImage-4.9.309) | [Headers](https://files.sboc.dev/linux-headers/linux-4.4.309-headers.tar.gz)| Yes  | 
+| 4.4.302| [bZimage](https://files.sboc.dev/linux-kernels/bzImage-4.4.302) | [Headers](https://files.sboc.dev/linux-headers/linux-4.4.302-headers.tar.gz)| Yes | 
 
 ## Pre-Built Disk Images <a name="pre-built-disks"/>
 
 | Name    | Link      | SSH Key |
 | :---:   | :---:     | :---:   |
-| Syzcaller Debian Stretch   | [Image](https://files.sboc.dev/images/stretch/stretch.img)  | [Key](https://files.sboc.dev/images/stretch/stretch.id_rsa)  
+| Syzcaller Debian Buster   | [Image](https://files.sboc.dev/images/syzcaller-buster/buster.img)  | [Key](https://files.sboc.dev/images/syzcaller-buster/buster.id_rsa)  
+| Syzcaller Debian Stretch   | [Image](https://files.sboc.dev/images/syzcaller-stretch/stretch.img)  | [Key](https://files.sboc.dev/images/syzcaller-stretch/stretch.id_rsa)  
 
 ## Using Other Kernels <a name="using-other-kernels"/>
 

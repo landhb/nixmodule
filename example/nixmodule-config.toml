@@ -38,6 +38,38 @@ sshkey = "images/stretch/stretch.id_rsa"
 boot = "/dev/sda"
 
 #######################################################
+# 5.15.33 Test
+#######################################################
+[[kernels]]
+version = "5.15.33"
+url_base = "https://files.sboc.dev"
+headers = "linux-headers/linux-5.15.33-headers.tar.gz" 
+kernel = "linux-kernels/bzImage-linux-5.15.33"
+runner = "qemu-system-x86_64"
+
+[kernels.disk]
+url_base = "https://files.sboc.dev"
+path = "images/stretch/stretch.img"
+sshkey = "images/stretch/stretch.id_rsa"
+boot = "/dev/sda"
+
+#######################################################
+# 5.10.110 Test
+#######################################################
+[[kernels]]
+version = "5.10.110"
+url_base = "https://files.sboc.dev"
+headers = "linux-headers/linux-5.10.110-headers.tar.gz" 
+kernel = "linux-kernels/bzImage-linux-5.10.110"
+runner = "qemu-system-x86_64"
+
+[kernels.disk]
+url_base = "https://files.sboc.dev"
+path = "images/stretch/stretch.img"
+sshkey = "images/stretch/stretch.id_rsa"
+boot = "/dev/sda"
+
+#######################################################
 # 5.8.9 Test
 #######################################################
 [[kernels]]
@@ -120,13 +152,13 @@ sshkey = "images/stretch/stretch.id_rsa"
 boot = "/dev/sda"
 
 #######################################################
-# 4.1.52
+# 4.4.302
 #######################################################
 [[kernels]]
-version = "4.1.52"
+version = "4.4.302"
 url_base = "https://files.sboc.dev"
-headers = "linux-headers/linux-4.1.52-headers.tar.gz" 
-kernel = "linux-kernels/bzImage-4.1.52"
+headers = "linux-headers/linux-4.4.302-headers.tar.gz" 
+kernel = "linux-kernels/bzImage-linux-4.4.302"
 runner = "qemu-system-x86_64"
 
 [kernels.disk]
