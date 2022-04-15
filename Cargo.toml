@@ -18,7 +18,7 @@ license = "Apache-2.0 OR MIT"
 tar = "0.4.38"
 rand = "0.8"
 toml = "0.5.8"
-reqwest = {version = "0.11.10", default-features = false,  features = ["default-tls", "blocking"]}
+reqwest = {version = "0.11.10", default-features = false,  features = ["rustls-tls-native-roots", "blocking"]}
 structopt = "0.3.26"
 flate2 = "1.0.22"
 home-dir = "0.1.0"
