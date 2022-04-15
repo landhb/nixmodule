@@ -4,7 +4,6 @@ CONFIG_MODULE_SIG=n
 TARGET=example
 obj-m += $(TARGET).o
 $(TARGET)-objs := src/example.o
-#EXTRA_CFLAGS := -O2 -I$(PWD)/include
 
 # Overriden with kernel version during tests
 KERNEL := /lib/modules/$(shell uname -r)/build
