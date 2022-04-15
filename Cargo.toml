@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["landhb <landhb@github>"]
 edition = "2021"
 description = """
-Automatically test out-of-tree linux kernel modules across multiple kernel versions.
+Simple qemu-kvm wrapper to automatically test out-of-tree linux kernel modules across multiple kernel versions.
 The provided images all have `KASAN` to aide your development.
 """
 homepage = "https://github.com/landhb/nixmodule"

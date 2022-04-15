@@ -1,7 +1,7 @@
 
 # NixModule [![cargo-badge][]][cargo-link]
 
-Automatically test out-of-tree linux kernel modules across multiple kernel versions. The provided images all have `KASAN` to aide your development.
+Simple qemu-kvm wrapper to automatically test out-of-tree linux kernel modules across multiple kernel versions. The provided images all have `KASAN` to aide your development.
 
 ```sh
 cargo install nixmodule
