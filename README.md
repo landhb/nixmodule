@@ -39,8 +39,8 @@ Check [`nixmodule-config.toml`](example/nixmodule-config.toml) for an example co
 
 | Name    | Link      | SSH Key |
 | :---:   | :---:     | :---:   |
-| Syzkaller Debian Buster   | [Image](https://files.sboc.dev/images/syzkaller-buster/buster.img)  | [Key](https://files.sboc.dev/images/syzkaller-buster/buster.id_rsa)  
-| Syzkaller Debian Stretch   | [Image](https://files.sboc.dev/images/syzkaller-stretch/stretch.img)  | [Key](https://files.sboc.dev/images/syzkaller-stretch/stretch.id_rsa)  
+| Syzkaller Debian Buster   | [Image](https://files.sboc.dev/images/syzkaller-buster/buster.img)  | [Key](https://files.sboc.dev/images/syzkaller-buster/buster.id_rsa)  |
+| Syzkaller Debian Stretch   | [Image](https://files.sboc.dev/images/syzkaller-stretch/stretch.img)  | [Key](https://files.sboc.dev/images/syzkaller-stretch/stretch.id_rsa)  |
 
 ## Using Other Kernels <a name="using-other-kernels"/>
 
