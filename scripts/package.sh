@@ -37,7 +37,10 @@ popd
 pushd $BUILD_DIR/linux-$KERNEL
 make defconfig
 make kvmconfig | make kvm_guest.config
-echo "# Coverage collection.
+echo "
+CONFIG_CRYPTO_RSA=y
+
+# Coverage collection.
 CONFIG_KCOV=y
 
 # Debug info for symbolization.

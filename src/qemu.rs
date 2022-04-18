@@ -18,7 +18,7 @@ pub struct Qemu {
 
 impl Qemu {
     /// Start Qemu with the provided configuration
-    pub fn start(kernel: &KConfig) -> Result<Self, Box<dyn Error>> {
+    pub fn start(kernel: &KConfig, debug: bool) -> Result<Self, Box<dyn Error>> {
         let timeout = Duration::new(kernel.timeout.map_or(60, |v| v), 0);
         let mut qemu = Command::new(&kernel.runner);
 
@@ -36,6 +36,11 @@ impl Qemu {
         // KVM?
         if kernel.kvm {
             qemu.arg("-enable-kvm");
+        }
+
+        // Start gdbserver in debug mode
+        if debug {
+            qemu.arg("-s");
         }
 
         let fwd = format!("user,host=10.0.2.10,hostfwd=tcp:127.0.0.1:{}-:22", port);
@@ -134,6 +139,29 @@ impl Qemu {
             true => Ok(()),
             false => {
                 println!("{:?}", std::str::from_utf8(&res.stderr)?);
+                Err(SshError.into())
+            }
+        }
+    }
+
+    /// Enter an interactive shell on the running VM
+    /// does not return until the shell exits
+    pub fn interact(&self) -> Result<(), Box<dyn Error>> {
+        let mut session = Command::new("ssh")
+            .args(["-i", &self.sshkey])
+            .args(["-p", &self.sshport])
+            .args(["-oStrictHostKeyChecking=no"])
+            .arg("root@localhost")
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .stdin(Stdio::inherit())
+            .spawn()?;
+
+        log_status!("Use 'target remote localhost:1234' to connect to the gdb server");
+        match session.wait() {
+            Ok(_status) => Ok(()),
+            Err(e) => {
+                println!("{:?}", e);
                 Err(SshError.into())
             }
         }

@@ -42,6 +42,11 @@ struct Opt {
     /// only run 5.1*)
     #[structopt(short = "k", long = "kernel")]
     kernel: Option<String>,
+
+    /// Enter a shell on the box, also starts qemu with
+    /// gdb. Performs the build + setup stages first.
+    #[structopt(short = "d", long = "debug")]
+    debug: bool,
 }
 
 #[derive(Debug, Deserialize)]
@@ -97,7 +102,12 @@ fn enable_kvm() -> bool {
 }
 
 /// Run through the test
-fn test(module: &Module, kernel: &KConfig, handle: &Qemu) -> Result<(), Box<dyn Error>> {
+fn test(
+    module: &Module,
+    kernel: &KConfig,
+    handle: &Qemu,
+    debug: bool,
+) -> Result<(), Box<dyn Error>> {
     log_status!("Building module for {}", kernel.version);
 
     // Compile the module against the headers
@@ -113,10 +123,12 @@ fn test(module: &Module, kernel: &KConfig, handle: &Qemu) -> Result<(), Box<dyn 
     log_status!("Uploaded {}", uploaded);
 
     // Perform insmod
-    handle
-        .runcmd(&format!("insmod {} {}", uploaded, module.insmod_args))
-        .or(Err(InsmodError))?;
-    log_success!("Insmod successful for {}!", kernel.version);
+    if !debug {
+        handle
+            .runcmd(&format!("insmod {} {}", uploaded, module.insmod_args))
+            .or(Err(InsmodError))?;
+        log_success!("Insmod successful for {}!", kernel.version);
+    }
 
     // Upload all test files
     handle
@@ -126,15 +138,21 @@ fn test(module: &Module, kernel: &KConfig, handle: &Qemu) -> Result<(), Box<dyn 
         handle.transfer(&upload.local, &upload.remote)?;
     }
 
-    // Run the test script
-    handle
-        .runcmd(&module.test_script.remote)
-        .or(Err(TestError))?;
-    log_success!("Test successful for {}!", kernel.version);
+    // Run the test script or enter an interactive session
+    if !debug {
+        handle
+            .runcmd(&module.test_script.remote)
+            .or(Err(TestError))?;
+        log_success!("Test successful for {}!", kernel.version);
+    }
+
     Ok(())
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    // Return an appropriate exit code
+    let mut exitcode = Success as _;
+
     // Obtain the running config
     let opt = Opt::from_args();
     let mut config: Config = toml::from_slice(&read(opt.config)?)?;
@@ -162,22 +180,25 @@ fn main() -> Result<(), Box<dyn Error>> {
         cache.get(&mut kernel)?;
 
         // Start qemu with the config
-        let handle = Qemu::start(&kernel)?;
+        let handle = Qemu::start(&kernel, opt.debug)?;
 
         // Create results row
         let mut row = row![kernel.version, Fb->"N/A", "N/A".blue(), "N/A".blue()];
-        match test(&config.module, &kernel, &handle) {
+        match test(&config.module, &kernel, &handle, opt.debug) {
             Err(x) if x.downcast_ref::<NixModuleError>() == Some(&BuildError) => {
                 row.set_cell(cell!(Fr->"Failed"), 1)?;
+                exitcode = BuildError as _;
             }
             Err(x) if x.downcast_ref::<NixModuleError>() == Some(&InsmodError) => {
                 row.set_cell(cell!(Fg->"Ok"), 1)?;
                 row.set_cell(cell!(Fr->"Failed"), 2)?;
+                exitcode = InsmodError as _;
             }
             Err(x) if x.downcast_ref::<NixModuleError>() == Some(&TestError) => {
                 row.set_cell(cell!(Fg->"Ok"), 1)?;
                 row.set_cell(cell!(Fg->"Ok"), 2)?;
                 row.set_cell(cell!(Fr->"Failed"), 3)?;
+                exitcode = TestError as _;
             }
             Ok(_) => {
                 row.set_cell(cell!(Fg->"Ok"), 1)?;
@@ -188,10 +209,18 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
         table.add_row(row);
 
+        // Go interactive if a debug session was requested
+        if opt.debug {
+            handle.interact().unwrap_or_else(|e| println!("{:?}", e));
+        }
+
         // Wait and stop qemu
         handle.stop()?;
     }
 
-    table.printstd();
-    Ok(())
+    if !opt.debug {
+        table.printstd();
+    }
+
+    std::process::exit(exitcode);
 }

@@ -6,7 +6,9 @@ use std::error::Error;
 
 #[allow(dead_code)]
 #[derive(Debug, PartialEq)]
+#[repr(u8)]
 pub enum NixModuleError {
+    Success = 0,
     BadFilePath,
     QemuError,
     SshError,
