@@ -61,6 +61,7 @@ pub struct Module {
     name: String,
     test_script: UploadFile,
     insmod_args: String,
+    build_defines: Option<Vec<String>>,
     test_files: Vec<UploadFile>,
 }
 
@@ -111,7 +112,7 @@ fn test(
     log_status!("Building module for {}", kernel.version);
 
     // Compile the module against the headers
-    let build = ModuleBuilder::build(&module.name, &kernel)?;
+    let build = ModuleBuilder::build(&module.name, &module.build_defines, &kernel)?;
     log_success!("Build success for kernel {:?}", kernel.version);
 
     // Upload the module
@@ -210,7 +211,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         table.add_row(row);
 
         // Go interactive if a debug session was requested
-        if opt.debug {
+        if exitcode == Success as _ && opt.debug {
             handle.interact().unwrap_or_else(|e| println!("{:?}", e));
         }
 

@@ -7,9 +7,26 @@ use std::process::Command;
 pub struct ModuleBuilder;
 
 impl ModuleBuilder {
-    pub fn build(name: &str, kernel: &KConfig) -> Result<String, Box<dyn Error>> {
+    pub fn build(
+        name: &str,
+        defines: &Option<Vec<String>>,
+        kernel: &KConfig,
+    ) -> Result<String, Box<dyn Error>> {
         let builddir = std::env::var("PWD")?;
-        let res = Command::new("make")
+        let mut make = Command::new("make");
+
+        if let Some(definition) = defines {
+            let mut tuples: Vec<(&str, &str)> = Vec::new();
+            for v in definition.iter() {
+                let mut inner = v.split("=");
+                let name = inner.next().ok_or(BuildError)?;
+                let value = inner.next().ok_or(BuildError)?;
+                tuples.push((name, value));
+            }
+            make.envs(tuples);
+        }
+
+        let res = make
             .current_dir(&builddir)
             .arg(format!("KERNEL={}", kernel.headers))
             .arg(format!("TARGET={}-{}", name, kernel.version))
