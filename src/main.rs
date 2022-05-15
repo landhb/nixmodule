@@ -75,6 +75,7 @@ pub struct UploadFile {
 pub struct DiskImage {
     url_base: String,
     path: String,
+    initrd: Option<String>,
     sshkey: String,
     boot: String,
 }
@@ -136,7 +137,9 @@ fn test(
         .transfer(&module.test_script.local, &module.test_script.remote)
         .or(Err(TestError))?;
     for upload in &module.test_files {
-        handle.transfer(&upload.local, &upload.remote).or(Err(TestError))?;
+        handle
+            .transfer(&upload.local, &upload.remote)
+            .or(Err(TestError))?;
     }
 
     // Run the test script or enter an interactive session

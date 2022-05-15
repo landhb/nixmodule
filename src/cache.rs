@@ -66,6 +66,20 @@ impl Cache {
         let disk_dpath = self.download(&disk_url, &disk_cpath)?;
         self.check_local(&disk_dpath, &disk_cpath)?;
 
+        // Optional initrd
+        if let Some(ref path) = kernel.disk.initrd {
+            let initrd_url = format!("{}/{}", kernel.disk.url_base, path);
+            let initrd_cpath = images_dir.join(&Path::new(&path).file_name().unwrap());
+            let initrd_dpath = self.download(&initrd_url, &initrd_cpath)?;
+            self.check_local(&initrd_dpath, &initrd_cpath)?;
+            kernel.disk.initrd = Some(
+                initrd_cpath
+                    .into_os_string()
+                    .into_string()
+                    .or(Err(BadFilePath))?,
+            );
+        }
+
         // Get ssh key
         let key_url = format!("{}/{}", kernel.disk.url_base, kernel.disk.sshkey);
         let key_cpath = images_dir.join(&Path::new(&kernel.disk.sshkey).file_name().unwrap());
