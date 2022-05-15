@@ -26,11 +26,13 @@ impl Qemu {
         let port: u16 = rand::thread_rng().gen_range(1025..=65535);
 
         // Optional args
-        match &kernel.runner_extra_args {
-            Some(ref extra) => {
-                qemu.args(extra);
-            }
-            _ => {}
+        if let Some(ref extra) = &kernel.runner_extra_args {
+            qemu.args(extra);
+        }
+
+        // Initrd?
+        if let Some(ref path) = kernel.disk.initrd {
+            qemu.args(["-initrd", path]);
         }
 
         // KVM?
