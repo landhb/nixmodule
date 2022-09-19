@@ -30,12 +30,15 @@ enum ArchiveType {
 
 impl Cache {
     /// Initialize the cache
-    pub fn new(cache: &PathBuf) -> Self {
-        if !cache.as_path().exists() {
+    pub fn new<T: AsRef<OsStr> + ?Sized>(cache: &T) -> Self {
+        let cache = Path::new(&cache);
+        if !cache.exists() {
             fs::create_dir_all(cache.join("downloads")).unwrap();
             fs::create_dir_all(cache.join("cache").join("images")).unwrap();
         }
-        Self { dir: cache.clone() }
+        Self {
+            dir: cache.to_path_buf(),
+        }
     }
 
     /// Retrieve a path from the cache.

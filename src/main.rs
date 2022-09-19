@@ -1,11 +1,11 @@
+use clap::Parser;
 use colored::*;
-use home_dir::HomeDirExt;
 use prettytable::Table;
 use serde::Deserialize;
 use std::error::Error;
 use std::fs::read;
+use std::ops::Deref;
 use std::path::{Path, PathBuf};
-use structopt::StructOpt;
 
 #[macro_use]
 mod utils;
@@ -25,12 +25,12 @@ use builder::ModuleBuilder;
 #[macro_use]
 extern crate prettytable;
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "nixmodule")]
+#[derive(Parser, Debug)]
+#[clap(author, version, about, name = "nixmodule")]
 struct Opt {
     /// Path to a configuration file
-    #[structopt(
-        short = "c",
+    #[clap(
+        short = 'c',
         long = "config",
         default_value = "./nixmodule-config.toml"
     )]
@@ -40,18 +40,18 @@ struct Opt {
     /// or any kernel that starts with this value
     /// (i.e 5 will run every 5.X.X vs 5.1 which will
     /// only run 5.1*)
-    #[structopt(short = "k", long = "kernel")]
+    #[clap(short = 'k', long = "kernel")]
     kernel: Option<String>,
 
     /// Enter a shell on the box, also starts qemu with
     /// gdb. Performs the build + setup stages first.
-    #[structopt(short = "d", long = "debug")]
+    #[clap(short = 'd', long = "debug")]
     debug: bool,
 }
 
 #[derive(Debug, Deserialize)]
 struct Config {
-    cache: PathBuf,
+    cache: String,
     module: Module,
     kernels: Vec<KConfig>,
 }
@@ -162,7 +162,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut config: Config = toml::from_slice(&read(opt.config)?)?;
 
     // Init the cache
-    let cache = Cache::new(&config.cache.expand_home()?);
+    let cache = Cache::new(&shellexpand::tilde(&config.cache).deref());
 
     // Results table
     let mut table = Table::new();
