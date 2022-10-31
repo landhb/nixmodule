@@ -14,7 +14,9 @@ version_greater_equal()
     printf '%s\n%s\n' "$2" "$1" | sort --check=quiet --version-sort
 }
 
-if version_greater_equal $KERNEL 5.0 ; then
+if version_greater_equal $KERNEL 6.0 ; then
+    URL="v6.x"
+elif version_greater_equal $KERNEL 5.0 ; then
     URL="v5.x"
 elif version_greater_equal $KERNEL 4.0 ; then
     URL="v4.x"
@@ -45,6 +47,8 @@ CONFIG_KCOV=y
 
 # Debug info for symbolization.
 CONFIG_DEBUG_INFO=y
+CONFIG_GDB_SCRIPS=y
+CONFIG_DBUG_KERNEL=y
 
 # Memory bug detector
 CONFIG_KASAN=y

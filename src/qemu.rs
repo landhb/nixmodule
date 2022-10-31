@@ -130,7 +130,7 @@ impl Qemu {
     pub fn transfer(&self, local: &str, remote: &str) -> Result<(), Box<dyn Error>> {
         log_status!("Uploading {}", local);
         let res = Command::new("scp")
-            .args(["-i", &self.sshkey])
+            .args(["-O", "-i", &self.sshkey])
             .args(["-P", &self.sshport])
             .args(["-oStrictHostKeyChecking=no"])
             .arg(local)
