@@ -19,6 +19,9 @@ use errors::NixModuleError::{self, *};
 mod qemu;
 use qemu::Qemu;
 
+mod ssh;
+use ssh::SshVersion;
+
 mod builder;
 use builder::ModuleBuilder;
 
@@ -113,7 +116,7 @@ fn test(
     log_status!("Building module for {}", kernel.version);
 
     // Compile the module against the headers
-    let build = ModuleBuilder::build(&module.name, &module.build_defines, &kernel)?;
+    let build = ModuleBuilder::build(&module.name, &module.build_defines, kernel)?;
     log_success!("Build success for kernel {:?}", kernel.version);
 
     // Upload the module
@@ -179,16 +182,24 @@ fn main() -> Result<(), Box<dyn Error>> {
         None => Box::new(config.kernels.iter_mut()),
     };
 
-    for mut kernel in kernel_iter {
+    // Detect host SSH client version (dirty hack)
+    let ssh_version = SshVersion::query()?;
+    log_status!(
+        "Host SSH client version: {:?}, legacy: {:?}",
+        ssh_version.version(),
+        ssh_version.is_legacy()
+    );
+
+    for kernel in kernel_iter {
         // Download or retrieve cached items
-        cache.get(&mut kernel)?;
+        cache.get(kernel)?;
 
         // Start qemu with the config
-        let handle = Qemu::start(&kernel, opt.debug)?;
+        let handle = Qemu::start(kernel, opt.debug, ssh_version.is_legacy())?;
 
         // Create results row
         let mut row = row![kernel.version, Fb->"N/A", "N/A".blue(), "N/A".blue()];
-        match test(&config.module, &kernel, &handle, opt.debug) {
+        match test(&config.module, kernel, &handle, opt.debug) {
             Err(x) if x.downcast_ref::<NixModuleError>() == Some(&BuildError) => {
                 row.set_cell(cell!(Fr->"Failed"), 1)?;
                 exitcode = BuildError as _;

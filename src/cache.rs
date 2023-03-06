@@ -59,20 +59,20 @@ impl Cache {
 
         // Get bzImage
         let kernel_url = format!("{}/{}", kernel.url_base, kernel.kernel);
-        let kernel_cpath = cache_dir.join(&Path::new(&kernel.kernel).file_name().unwrap());
+        let kernel_cpath = cache_dir.join(Path::new(&kernel.kernel).file_name().unwrap());
         let kernel_dpath = self.download(&kernel_url, &kernel_cpath)?;
         self.check_local(&kernel_dpath, &kernel_cpath)?;
 
         // Get disk image
         let disk_url = format!("{}/{}", kernel.disk.url_base, kernel.disk.path);
-        let disk_cpath = images_dir.join(&Path::new(&kernel.disk.path).file_name().unwrap());
+        let disk_cpath = images_dir.join(Path::new(&kernel.disk.path).file_name().unwrap());
         let disk_dpath = self.download(&disk_url, &disk_cpath)?;
         self.check_local(&disk_dpath, &disk_cpath)?;
 
         // Optional initrd
         if let Some(ref path) = kernel.disk.initrd {
             let initrd_url = format!("{}/{}", kernel.disk.url_base, path);
-            let initrd_cpath = images_dir.join(&Path::new(&path).file_name().unwrap());
+            let initrd_cpath = images_dir.join(Path::new(&path).file_name().unwrap());
             let initrd_dpath = self.download(&initrd_url, &initrd_cpath)?;
             self.check_local(&initrd_dpath, &initrd_cpath)?;
             kernel.disk.initrd = Some(
@@ -85,7 +85,7 @@ impl Cache {
 
         // Get ssh key
         let key_url = format!("{}/{}", kernel.disk.url_base, kernel.disk.sshkey);
-        let key_cpath = images_dir.join(&Path::new(&kernel.disk.sshkey).file_name().unwrap());
+        let key_cpath = images_dir.join(Path::new(&kernel.disk.sshkey).file_name().unwrap());
         let key_dpath = self.download(&key_url, &key_cpath)?;
         self.check_local(&key_dpath, &key_cpath)?;
 
@@ -120,11 +120,11 @@ impl Cache {
         // If the file is an archive, unpack it first
         match dpath.extension() {
             Some(ext) if matches!(self.is_archive(ext), Some(_)) => {
-                self.unpack(&cpath, &dpath, self.is_archive(ext).unwrap())?;
+                self.unpack(cpath, dpath, self.is_archive(ext).unwrap())?;
             }
             _ => {
-                fs::rename(&dpath, &cpath)?;
-                fs::set_permissions(&cpath, Permissions::from_mode(0o600))?;
+                fs::rename(dpath, cpath)?;
+                fs::set_permissions(cpath, Permissions::from_mode(0o600))?;
             }
         }
         Ok(())
@@ -132,7 +132,7 @@ impl Cache {
 
     /// Either performs a download or skips the request if the file
     /// already exists in $CACHE/downloads
-    fn download(&self, uri: &str, cpath: &PathBuf) -> Result<PathBuf, Box<dyn Error>> {
+    fn download<P: AsRef<Path>>(&self, uri: &str, cpath: &P) -> Result<PathBuf, Box<dyn Error>> {
         // Verify download isn't cached
         let url = Url::parse(uri)?;
         let fname = url
@@ -145,7 +145,7 @@ impl Cache {
         let fname = self.dir.as_path().join("downloads").join(fname);
 
         // This response is already downloaded
-        if cpath.exists() || fname.exists() {
+        if cpath.as_ref().exists() || fname.exists() {
             return Ok(fname);
         }
 

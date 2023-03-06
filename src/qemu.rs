@@ -14,11 +14,12 @@ pub struct Qemu {
     handle: Child,
     sshkey: String,
     sshport: String,
+    legacy_ssh: bool,
 }
 
 impl Qemu {
     /// Start Qemu with the provided configuration
-    pub fn start(kernel: &KConfig, debug: bool) -> Result<Self, Box<dyn Error>> {
+    pub fn start(kernel: &KConfig, debug: bool, legacy: bool) -> Result<Self, Box<dyn Error>> {
         let timeout = Duration::new(kernel.timeout.map_or(60, |v| v), 0);
         let mut qemu = Command::new(&kernel.runner);
 
@@ -69,6 +70,7 @@ impl Qemu {
                 .or(Err(QemuError))?,
             sshkey: kernel.disk.sshkey.clone(),
             sshport: port.to_string(),
+            legacy_ssh: legacy,
         };
 
         log_status!("Waiting for VM to boot...");
@@ -85,7 +87,7 @@ impl Qemu {
         // Wait until boot is complete/port is open
         let addr = SocketAddr::from(([127, 0, 0, 1], port));
         let start = Instant::now();
-        while let Err(_) = TcpStream::connect_timeout(&addr, timeout) {
+        while TcpStream::connect_timeout(&addr, timeout).is_err() {
             if start.elapsed() > timeout {
                 return Err(TimeoutError.into());
             }
@@ -97,7 +99,7 @@ impl Qemu {
         let mut stream = TcpStream::connect_timeout(&addr, timeout)?;
         stream.set_read_timeout(Some(timeout))?;
         let start = Instant::now();
-        while let Err(_) = stream.read(&mut buf) {
+        while stream.read(&mut buf).is_err() {
             if start.elapsed() > timeout {
                 return Err(TimeoutError.into());
             }
@@ -127,10 +129,21 @@ impl Qemu {
     }
 
     /// Transfer a file into the running VM
+    ///
+    /// The scp client since 9.0 from using the legacy scp/rcp protocol
+    /// to using the SFTP protocol by default.
     pub fn transfer(&self, local: &str, remote: &str) -> Result<(), Box<dyn Error>> {
         log_status!("Uploading {}", local);
-        let res = Command::new("scp")
-            .args(["-O", "-i", &self.sshkey])
+        let mut builder = Command::new("scp");
+
+        // Max compat for newest ssh clients
+        if !self.legacy_ssh {
+            builder.arg("-O");
+        }
+
+        // Run the transfer
+        let res = builder
+            .args(["-i", &self.sshkey])
             .args(["-P", &self.sshport])
             .args(["-oStrictHostKeyChecking=no"])
             .arg(local)
