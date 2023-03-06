@@ -18,7 +18,7 @@ impl ModuleBuilder {
         if let Some(definition) = defines {
             let mut tuples: Vec<(&str, &str)> = Vec::new();
             for v in definition.iter() {
-                let mut inner = v.split("=");
+                let mut inner = v.split('=');
                 let name = inner.next().ok_or(BuildError)?;
                 let value = inner.next().ok_or(BuildError)?;
                 tuples.push((name, value));

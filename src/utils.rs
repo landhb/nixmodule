@@ -20,7 +20,7 @@ macro_rules! prompt {
 
 /// Print output by line
 pub fn print_output(out: &str) {
-    for line in out.split("\n") {
+    for line in out.split('\n') {
         println!("{}", line);
     }
 }
