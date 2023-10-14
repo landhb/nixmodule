@@ -161,7 +161,15 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut exitcode = Success as _;
 
     // Obtain the running config
-    let opt = Opt::from_args();
+    let opt = Opt::parse();
+
+    // Test if file exists
+    if !opt.config.exists() {
+        println!("Config path {:?} does not exist.", opt.config);
+        std::process::exit(0);
+    }
+
+    // Read config file
     let mut config: Config = toml::from_slice(&read(opt.config)?)?;
 
     // Init the cache
