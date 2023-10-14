@@ -119,7 +119,7 @@ impl Cache {
 
         // If the file is an archive, unpack it first
         match dpath.extension() {
-            Some(ext) if matches!(self.is_archive(ext), Some(_)) => {
+            Some(ext) if self.is_archive(ext).is_some() => {
                 self.unpack(cpath, dpath, self.is_archive(ext).unwrap())?;
             }
             _ => {
